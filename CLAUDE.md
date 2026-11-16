@@ -477,8 +477,8 @@ Work top to bottom. Tick each item when done.
 - [x] 1.1 Project setup: Laravel 13 + Breeze (Blade), MySQL connection, `APP_TIMEZONE=Asia/Manila`, Git repo, `README.md` with setup steps
 - [x] 1.2 Base layout: sidebar + top bar, colors in Tailwind config, shared Blade components (`card`, `page-header`, `status-badge`, `flash`, `empty-state`, `confirm-delete`)
 - [x] 1.3 Users: add `id_number`, `department`, `phone`, `role`, `is_active`; `UserRole` enum; update registration; `EnsureRole` + `EnsureUserIsActive` middleware; role-based sidebar
-- [ ] 1.4 Categories CRUD (admin) — **this becomes the CRUD pattern** for the rest (Form Request, policy, flash messages, confirm delete)
-- [ ] 1.5 All migrations + models + relationships + enums (Section 6), factories and seeders
+- [x] 1.4 Categories CRUD (admin) — **this becomes the CRUD pattern** for the rest (Form Request, policy, flash messages, confirm delete)
+- [ ] 1.5 All migrations + models + relationships + enums (Section 6), factories and seeders — also add the FR-C1 "category with equipment cannot be deleted" check in `Admin\CategoryController@destroy` + test
 
 ### Phase 2 — Core modules (Days 4–9)
 - [ ] 2.1 Equipment CRUD + photo upload + search/filters + soft delete (FR-E1, E2, E5, E6)

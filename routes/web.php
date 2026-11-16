@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\Admin;
 use App\Http\Controllers\ProfileController;
 use Illuminate\Support\Facades\Route;
 
@@ -19,7 +20,8 @@ Route::middleware(['auth', 'active'])->group(function () {
 
     // Admin-only pages: URLs start with /admin, route names start with "admin.".
     Route::middleware('role:admin')->prefix('admin')->name('admin.')->group(function () {
-        // Filled in from step 1.4 (categories) onwards.
+        // One line = 6 routes: index, create, store, edit, update, destroy (names admin.categories.*).
+        Route::resource('categories', Admin\CategoryController::class)->except('show');
     });
 });
 
