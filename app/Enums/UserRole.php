@@ -25,7 +25,7 @@ enum UserRole: string
     public function color(): string
     {
         return match ($this) {
-            self::Admin => 'indigo',
+            self::Admin => 'azure',
             self::Faculty => 'blue',
             self::Student => 'gray',
         };

@@ -423,10 +423,14 @@ Goal (rubric): **intuitive, visually appealing, consistent**. All screens use th
 - Responsive: usable on a phone (important for QR scanning and borrowers).
 
 ### 10.2 Colors (`tailwind.config.js` theme extend)
-- **Primary:** indigo `#4F46E5` (buttons, links, active nav); **Accent:** teal `#0D9488`
-- **Background:** `#F8FAFC`; **Card:** `#FFFFFF`; **Text:** `#0F172A`; **Muted:** `#64748B`; **Border:** `#E2E8F0`
+Style: **Clean SaaS / modern operational UI**. Dark sidebar, light content area, white cards, one brand gradient for hero areas. Dashboards are an **operational + analytical hybrid** (KPI tiles and today's work, plus charts).
+- **Primary (`primary-*`):** Dark Azure `#00638E` = `primary-600` (buttons, links, active nav); Light Azure `#BFD8E3` = `primary-200`; full scale 50–950 in the config
+- **Sidebar:** Onyx `onyx` `#141414`; hover/borders Charcoal `charcoal` `#2B2B2B`
+- **Branding gradient (`bg-brand`):** `#000000 → #004A6B → #00638E → #8CB9CC` (dashboard banner, login panel, logo)
+- **Background `canvas`:** `#F4F7F9`; **Card:** Paper White `#FFFFFF`; **Text `ink`:** `#141414`; **Muted:** `#64748B`; **Border `line`:** `#E3E9ED`
 - **Status badges:**
   - Reservation: Pending amber, Approved blue, Released indigo, Returned green, Rejected red, Cancelled gray, **Overdue red (solid)**
+  - Roles: Admin azure, Faculty blue, Student gray
   - Equipment: Available green, Borrowed/Reserved indigo, Under maintenance amber, Retired gray
   - Damage: Open red, Under repair amber, Resolved green
 - Radius: `rounded-xl` cards, `rounded-lg` inputs/buttons. Spacing: Tailwind scale only (no inline styles).

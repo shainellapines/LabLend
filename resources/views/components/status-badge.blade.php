@@ -17,7 +17,8 @@
         'green'     => 'bg-green-50 text-green-700 ring-green-600/20',
         'amber'     => 'bg-amber-50 text-amber-800 ring-amber-600/20',
         'blue'      => 'bg-blue-50 text-blue-700 ring-blue-600/20',
-        'indigo'    => 'bg-primary-50 text-primary-700 ring-primary-600/20',
+        'indigo'    => 'bg-indigo-50 text-indigo-700 ring-indigo-600/20',
+        'azure'     => 'bg-primary-50 text-primary-700 ring-primary-600/20',
         'red'       => 'bg-red-50 text-red-700 ring-red-600/20',
         'red-solid' => 'bg-red-600 text-white ring-red-600', // used for "Overdue"
     ][$color] ?? 'bg-slate-100 text-slate-700 ring-slate-500/20';

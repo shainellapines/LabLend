@@ -1,4 +1,4 @@
-<header class="sticky top-0 z-20 flex h-16 items-center gap-4 border-b border-line bg-white px-4 sm:px-6 lg:px-8">
+<header class="sticky top-0 z-20 flex h-16 items-center gap-3 border-b border-line bg-white/85 px-4 backdrop-blur sm:px-6 lg:px-8">
     <!-- Hamburger (mobile only) -->
     <button type="button" @click="sidebarOpen = true" class="rounded-lg p-2 text-muted hover:bg-canvas lg:hidden">
         <span class="sr-only">Open menu</span>
@@ -10,6 +10,14 @@
     {{-- Page title: each page sets it with a "title" slot. (Blade comment on purpose: Blade would compile
          a component tag even inside an HTML comment.) --}}
     <h1 class="flex-1 truncate text-lg font-semibold text-ink">{{ $title ?? '' }}</h1>
+
+    <!-- Today's date (desktop only) -->
+    <span class="hidden items-center gap-2 rounded-lg border border-line bg-white px-3 py-1.5 text-sm text-muted md:flex">
+        <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M6.75 3v2.25M17.25 3v2.25M3 18.75V7.5a2.25 2.25 0 012.25-2.25h13.5A2.25 2.25 0 0121 7.5v11.25m-18 0A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75m-18 0v-7.5A2.25 2.25 0 015.25 9h13.5A2.25 2.25 0 0121 11.25v7.5" />
+        </svg>
+        {{ now()->format('D, M d, Y') }}
+    </span>
 
     <!-- Notification bell (placeholder; unread count + dropdown come in step 3.1) -->
     <button type="button" class="rounded-lg p-2 text-muted hover:bg-canvas hover:text-ink" title="Notifications">
