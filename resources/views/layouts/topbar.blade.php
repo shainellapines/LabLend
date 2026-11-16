@@ -7,7 +7,8 @@
         </svg>
     </button>
 
-    <!-- Page title (pages pass it with <x-slot name="title">) -->
+    {{-- Page title: each page sets it with a "title" slot. (Blade comment on purpose: Blade would compile
+         a component tag even inside an HTML comment.) --}}
     <h1 class="flex-1 truncate text-lg font-semibold text-ink">{{ $title ?? '' }}</h1>
 
     <!-- Notification bell (placeholder; unread count + dropdown come in step 3.1) -->

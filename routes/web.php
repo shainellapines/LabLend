@@ -7,14 +7,20 @@ Route::get('/', function () {
     return view('welcome');
 });
 
-Route::get('/dashboard', function () {
-    return view('dashboard');
-})->middleware(['auth', 'verified'])->name('dashboard');
+// Every logged-in page uses 'auth' (must be logged in) and 'active' (account not deactivated).
+Route::middleware(['auth', 'active'])->group(function () {
+    Route::get('/dashboard', function () {
+        return view('dashboard');
+    })->middleware('verified')->name('dashboard');
 
-Route::middleware('auth')->group(function () {
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
+
+    // Admin-only pages: URLs start with /admin, route names start with "admin.".
+    Route::middleware('role:admin')->prefix('admin')->name('admin.')->group(function () {
+        // Filled in from step 1.4 (categories) onwards.
+    });
 });
 
 require __DIR__.'/auth.php';

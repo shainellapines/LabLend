@@ -47,6 +47,30 @@
             @endif
         </div>
 
+        <div class="grid gap-6 sm:grid-cols-2">
+            <div>
+                <x-input-label value="ID Number" />
+                <p class="mt-2 text-sm text-ink">{{ $user->id_number }}</p>
+            </div>
+            <div>
+                <x-input-label value="Role" />
+                <x-status-badge :status="$user->role" class="mt-2" />
+            </div>
+        </div>
+        <p class="-mt-4 text-xs text-muted">Ask the lab custodian if your ID number or role is wrong.</p>
+
+        <div>
+            <x-input-label for="department" value="Department / Program" />
+            <x-text-input id="department" name="department" type="text" class="mt-1 block w-full" :value="old('department', $user->department)" placeholder="e.g. BSIT" />
+            <x-input-error class="mt-2" :messages="$errors->get('department')" />
+        </div>
+
+        <div>
+            <x-input-label for="phone" value="Phone" />
+            <x-text-input id="phone" name="phone" type="tel" class="mt-1 block w-full" :value="old('phone', $user->phone)" maxlength="20" />
+            <x-input-error class="mt-2" :messages="$errors->get('phone')" />
+        </div>
+
         <div class="flex items-center gap-4">
             <x-primary-button>{{ __('Save') }}</x-primary-button>
 

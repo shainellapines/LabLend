@@ -17,6 +17,11 @@ return new class extends Migration
             $table->string('email')->unique();
             $table->timestamp('email_verified_at')->nullable();
             $table->string('password');
+            $table->string('id_number', 30)->unique(); // student / employee number
+            $table->string('department')->nullable();   // e.g. "BSIT"
+            $table->string('phone', 20)->nullable();
+            $table->string('role', 20)->default('student'); // App\Enums\UserRole
+            $table->boolean('is_active')->default(true);    // false = deactivated, cannot log in
             $table->rememberToken();
             $table->timestamps();
         });

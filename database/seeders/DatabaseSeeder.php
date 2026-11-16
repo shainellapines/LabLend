@@ -15,11 +15,19 @@ class DatabaseSeeder extends Seeder
      */
     public function run(): void
     {
-        // User::factory(10)->create();
+        // Temporary demo accounts (password: "password"). The full UserSeeder comes in step 1.5.
+        User::factory()->admin()->create([
+            'name' => 'Lab Custodian',
+            'email' => 'admin@lablend.test',
+            'id_number' => 'EMP-0001',
+            'department' => 'IT Department',
+        ]);
 
         User::factory()->create([
-            'name' => 'Test User',
-            'email' => 'test@example.com',
+            'name' => 'Student Demo',
+            'email' => 'student@lablend.test',
+            'id_number' => '2024-00001',
+            'department' => 'BSIT',
         ]);
     }
 }
