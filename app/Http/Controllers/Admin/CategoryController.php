@@ -64,7 +64,12 @@ class CategoryController extends Controller
     {
         $this->authorize('delete', $category);
 
-        // Step 1.5 adds: if ($category->equipment()->exists()) -> refuse with an error message (FR-C1).
+        // FR-C1: a category that still has equipment cannot be deleted.
+        // withTrashed() also counts soft-deleted items, because they still point to this category.
+        $itemCount = $category->equipment()->withTrashed()->count();
+        if ($itemCount > 0) {
+            return back()->with('error', "\"{$category->name}\" still has {$itemCount} item(s). Move or delete them first.");
+        }
 
         $category->delete();
 

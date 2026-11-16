@@ -7,6 +7,7 @@ use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 
 #[Fillable(['name', 'code', 'description'])]
 class Category extends Model
@@ -14,7 +15,10 @@ class Category extends Model
     /** @use HasFactory<CategoryFactory> */
     use HasFactory;
 
-    // The equipment() relationship (hasMany) is added in step 1.5, together with the equipment table.
+    public function equipment(): HasMany
+    {
+        return $this->hasMany(Equipment::class);
+    }
 
     /**
      * Search by name or code. Used as Category::search($term) in the controller.

@@ -83,13 +83,20 @@ php artisan test                               # run the automated tests
 
 ## Demo accounts
 
-*(Added when the seeders are built — build step 1.5.)*
+Created by `php artisan migrate:fresh --seed`. **Every password is `password`.**
 
-| Role | Email | Password |
-|---|---|---|
-| admin | – | – |
-| faculty | – | – |
-| student | – | – |
+| Role | Name | Email | Notes |
+|---|---|---|---|
+| admin | Lab Custodian | `admin@lablend.test` | The custodian: approves, releases, receives |
+| faculty | Maria Santos | `faculty@lablend.test` | Has a laptop (LAP-0001) out right now, due in 2 days |
+| faculty | Jose Reyes | `faculty2@lablend.test` | |
+| student | Juan Dela Cruz | `student@lablend.test` | Use this one to make a new reservation in the demo |
+| student | Angela Mendoza | `student2@lablend.test` | Returned a damaged speaker (AUD-0001) 5 days ago |
+| student | Mark Villanueva | `student3@lablend.test` | |
+| student | Kristine Garcia | `student4@lablend.test` | |
+| student | Paolo Ramos | `student5@lablend.test` | **Overdue** projector (PRJ-0002): blocked from new reservations |
+
+The seed data also has 6 categories, 26 items, 4 rooms, and about 100 reservations from 30 days ago to 7 days ahead (no double bookings). The random choices use a fixed seed, so everyone on the team gets the same data.
 
 ---
 

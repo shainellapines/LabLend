@@ -3,6 +3,7 @@
 namespace Tests\Feature;
 
 use App\Models\Category;
+use App\Models\Equipment;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
@@ -94,6 +95,32 @@ class CategoryTest extends TestCase
             ->assertRedirect(route('admin.categories.index'));
 
         $this->assertModelMissing($category);
+    }
+
+    public function test_category_with_equipment_cannot_be_deleted(): void
+    {
+        $category = Category::factory()->create();
+        Equipment::factory()->for($category)->create();
+
+        $this->actingAs($this->admin())
+            ->from(route('admin.categories.index'))
+            ->delete(route('admin.categories.destroy', $category))
+            ->assertRedirect(route('admin.categories.index'))
+            ->assertSessionHas('error');
+
+        $this->assertModelExists($category);
+    }
+
+    public function test_category_with_only_soft_deleted_equipment_still_cannot_be_deleted(): void
+    {
+        $category = Category::factory()->create();
+        Equipment::factory()->for($category)->create()->delete(); // soft delete
+
+        $this->actingAs($this->admin())
+            ->delete(route('admin.categories.destroy', $category))
+            ->assertSessionHas('error');
+
+        $this->assertModelExists($category);
     }
 
     public function test_student_cannot_manage_categories(): void
