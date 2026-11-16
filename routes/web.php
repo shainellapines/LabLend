@@ -3,6 +3,7 @@
 use App\Http\Controllers\Admin;
 use App\Http\Controllers\EquipmentController;
 use App\Http\Controllers\ProfileController;
+use App\Http\Controllers\RoomController;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', function () {
@@ -26,11 +27,16 @@ Route::middleware(['auth', 'active'])->group(function () {
         ->withTrashed()
         ->name('equipment.show');
 
+    // Rooms: everyone can browse; changes are under /admin below.
+    Route::get('/rooms', [RoomController::class, 'index'])->name('rooms.index');
+    Route::get('/rooms/{room}', [RoomController::class, 'show'])->name('rooms.show');
+
     // Admin-only pages: URLs start with /admin, route names start with "admin.".
     Route::middleware('role:admin')->prefix('admin')->name('admin.')->group(function () {
         // One line = 6 routes: index, create, store, edit, update, destroy (names admin.categories.*).
         Route::resource('categories', Admin\CategoryController::class)->except('show');
         Route::resource('equipment', Admin\EquipmentController::class)->except('index', 'show');
+        Route::resource('rooms', Admin\RoomController::class)->except('index', 'show');
     });
 });
 
