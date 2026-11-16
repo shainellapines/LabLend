@@ -11,7 +11,7 @@
             @include('admin.equipment._form')
 
             <div class="mt-8 flex justify-end gap-3 border-t border-line pt-6">
-                <x-link-button :href="route('equipment.index')" variant="secondary">Cancel</x-link-button>
+                <x-link-button :href="route('equipment.show', $equipment)" variant="secondary">Cancel</x-link-button>
                 <x-primary-button>Save Changes</x-primary-button>
             </div>
         </form>

@@ -94,7 +94,7 @@ class EquipmentTest extends TestCase
             ->post(route('admin.equipment.store'), $this->validData($category, [
                 'photo' => UploadedFile::fake()->image('projector.jpg'),
             ]))
-            ->assertRedirect(route('equipment.index'))
+            ->assertRedirect('/equipment/PRJ-0001')
             ->assertSessionHas('success');
 
         $item = Equipment::first();
@@ -143,7 +143,7 @@ class EquipmentTest extends TestCase
                 'name' => 'Renamed Projector',
                 'photo' => UploadedFile::fake()->image('new.jpg'),
             ]))
-            ->assertRedirect(route('equipment.index'));
+            ->assertRedirect('/equipment/PRJ-0001');
 
         $item->refresh();
         $this->assertSame('Renamed Projector', $item->name);

@@ -38,7 +38,7 @@ class EquipmentController extends Controller
 
         $equipment = Equipment::create($data);
 
-        return redirect()->route('equipment.index')
+        return redirect()->route('equipment.show', $equipment)
             ->with('success', "{$equipment->asset_tag} \"{$equipment->name}\" was added.");
     }
 
@@ -63,7 +63,7 @@ class EquipmentController extends Controller
 
         $equipment->update($data);
 
-        return redirect()->route('equipment.index')
+        return redirect()->route('equipment.show', $equipment)
             ->with('success', "{$equipment->asset_tag} was updated.");
     }
 

@@ -70,12 +70,12 @@
                                     @endif
                                 </div>
                                 <div class="min-w-0">
-                                    <p class="truncate font-medium text-ink">{{ $item->name }}</p>
+                                    <a href="{{ route('equipment.show', $item) }}" class="block truncate font-medium text-ink hover:text-primary-700">{{ $item->name }}</a>
                                     <p class="truncate text-xs text-muted">{{ collect([$item->brand, $item->model])->filter()->implode(' · ') ?: '—' }}</p>
                                 </div>
                             </div>
                         </td>
-                        <td><span class="whitespace-nowrap rounded-md bg-primary-50 px-2 py-1 font-mono text-xs font-semibold text-primary-700">{{ $item->asset_tag }}</span></td>
+                        <td><a href="{{ route('equipment.show', $item) }}" class="whitespace-nowrap rounded-md bg-primary-50 px-2 py-1 font-mono text-xs font-semibold text-primary-700">{{ $item->asset_tag }}</a></td>
                         <td class="hidden text-muted lg:table-cell">{{ $item->category->name }}</td>
                         <td class="hidden md:table-cell"><x-status-badge :status="$item->condition" /></td>
                         <td><x-status-badge :status="$item->status" /></td>

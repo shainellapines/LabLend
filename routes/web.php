@@ -21,6 +21,10 @@ Route::middleware(['auth', 'active'])->group(function () {
 
     // Equipment: everyone can browse; changes are under /admin below.
     Route::get('/equipment', [EquipmentController::class, 'index'])->name('equipment.index');
+    // {equipment:asset_tag}: find the item by its asset tag (e.g. /equipment/PRJ-0004) instead of its id.
+    Route::get('/equipment/{equipment:asset_tag}', [EquipmentController::class, 'show'])
+        ->withTrashed()
+        ->name('equipment.show');
 
     // Admin-only pages: URLs start with /admin, route names start with "admin.".
     Route::middleware('role:admin')->prefix('admin')->name('admin.')->group(function () {
