@@ -471,7 +471,7 @@ Work top to bottom. Tick each item when done.
 
 ### Phase 1 — Foundation (Days 1–3)
 - [x] 1.1 Project setup: Laravel 13 + Breeze (Blade), MySQL connection, `APP_TIMEZONE=Asia/Manila`, Git repo, `README.md` with setup steps
-- [ ] 1.2 Base layout: sidebar + top bar, colors in Tailwind config, shared Blade components (`card`, `page-header`, `status-badge`, `flash`, `empty-state`, `confirm-delete`)
+- [x] 1.2 Base layout: sidebar + top bar, colors in Tailwind config, shared Blade components (`card`, `page-header`, `status-badge`, `flash`, `empty-state`, `confirm-delete`)
 - [ ] 1.3 Users: add `id_number`, `department`, `phone`, `role`, `is_active`; `UserRole` enum; update registration; `EnsureRole` + `EnsureUserIsActive` middleware; role-based sidebar
 - [ ] 1.4 Categories CRUD (admin) — **this becomes the CRUD pattern** for the rest (Form Request, policy, flash messages, confirm delete)
 - [ ] 1.5 All migrations + models + relationships + enums (Section 6), factories and seeders
