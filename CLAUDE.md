@@ -481,7 +481,7 @@ Work top to bottom. Tick each item when done.
 - [x] 1.5 All migrations + models + relationships + enums (Section 6), factories and seeders — also add the FR-C1 "category with equipment cannot be deleted" check in `Admin\CategoryController@destroy` + test
 
 ### Phase 2 — Core modules (Days 4–9)
-- [ ] 2.1 Equipment CRUD + photo upload + search/filters + soft delete (FR-E1, E2, E5, E6)
+- [x] 2.1 Equipment CRUD + photo upload + search/filters + soft delete (FR-E1, E2, E5, E6)
 - [ ] 2.2 Equipment detail page with computed availability + history (FR-E3)
 - [ ] 2.3 Rooms CRUD + detail page (FR-RM1, RM2)
 - [ ] 2.4 Reservation create/edit with validation rules and **conflict check** in `ReservationService` (FR-R1–R3, R9) + feature tests

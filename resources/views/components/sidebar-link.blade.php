@@ -1,8 +1,9 @@
-@props(['route', 'label', 'icon'])
+@props(['route', 'label', 'icon', 'also' => []])
 
 @php
-    // Highlight the link for the route itself and its children (e.g. equipment.index and equipment.show).
-    $active = request()->routeIs(\Illuminate\Support\Str::beforeLast($route, '.') . '*');
+    // Highlight the link for the route itself and its children (e.g. equipment.index and equipment.show),
+    // plus any extra route patterns in $also (e.g. 'admin.equipment.*' for the admin create/edit pages).
+    $active = request()->routeIs(\Illuminate\Support\Str::beforeLast($route, '.') . '*', ...$also);
     // Modules that are not built yet have no route, so the link is shown greyed out instead of crashing.
     $exists = \Illuminate\Support\Facades\Route::has($route);
 @endphp
