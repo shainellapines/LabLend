@@ -68,9 +68,9 @@
             {{-- FR-E4: QR code that opens this page --}}
             @unless ($equipment->trashed())
                 <x-card title="QR asset tag" subtitle="Scan with a phone camera to open this page">
-                    <div class="flex items-center gap-4">
-                        <x-qr-code :url="route('equipment.show', $equipment)" :size="112" class="shrink-0 border border-line" />
-                        <div class="min-w-0">
+                    <div class="flex flex-col items-center gap-3 text-center">
+                        <x-qr-code :url="route('equipment.show', $equipment)" :size="200" class="shrink-0 border border-line" />
+                        <div class="min-w-0 max-w-full">
                             <p class="font-mono text-lg font-semibold text-ink">{{ $equipment->asset_tag }}</p>
                             <p class="truncate text-xs text-muted">{{ route('equipment.show', $equipment) }}</p>
                             @if ($isAdmin)

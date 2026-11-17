@@ -5,5 +5,5 @@
 @props(['url', 'size' => 160])
 
 <div {{ $attributes->merge(['class' => 'inline-block rounded-lg bg-white p-2']) }} role="img" aria-label="QR code for {{ $url }}">
-    {!! SimpleSoftwareIO\QrCode\Facades\QrCode::format('svg')->size($size)->margin(0)->errorCorrection('M')->generate($url) !!}
+    {!! SimpleSoftwareIO\QrCode\Facades\QrCode::format('svg')->size($size)->margin(2)->errorCorrection('M')->generate($url) !!}
 </div>
