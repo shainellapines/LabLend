@@ -34,6 +34,7 @@ Route::middleware(['auth', 'active'])->group(function () {
 
     // Reservations (borrower side). index (My Reservations) comes in step 2.6.
     Route::resource('reservations', ReservationController::class)->only('create', 'store', 'show', 'edit', 'update');
+    Route::patch('/reservations/{reservation}/cancel', [ReservationController::class, 'cancel'])->name('reservations.cancel');
 
     // Admin-only pages: URLs start with /admin, route names start with "admin.".
     Route::middleware('role:admin')->prefix('admin')->name('admin.')->group(function () {
@@ -41,6 +42,14 @@ Route::middleware(['auth', 'active'])->group(function () {
         Route::resource('categories', Admin\CategoryController::class)->except('show');
         Route::resource('equipment', Admin\EquipmentController::class)->except('index', 'show');
         Route::resource('rooms', Admin\RoomController::class)->except('index', 'show');
+
+        // Reservation status actions (FR-R4–R6). All go through ReservationService::transition().
+        Route::controller(Admin\ReservationActionController::class)->prefix('reservations/{reservation}')->name('reservations.')->group(function () {
+            Route::patch('approve', 'approve')->name('approve');
+            Route::patch('reject', 'reject')->name('reject');
+            Route::patch('release', 'release')->name('release');
+            Route::patch('receive', 'receive')->name('receive');
+        });
     });
 });
 

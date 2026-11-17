@@ -27,7 +27,19 @@
         @endcan
     </div>
 
-    @if ($status === App\Enums\ReservationStatus::Pending)
+    {{-- Errors from a refused action (invalid status change, conflict found on approval, ...) --}}
+    @if ($errors->any())
+        <div class="mb-6 flex gap-3 rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-800">
+            <svg class="mt-0.5 h-5 w-5 shrink-0" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M12 9v3.75m9-.75a9 9 0 11-18 0 9 9 0 0118 0zm-9 3.75h.008v.008H12v-.008z" /></svg>
+            <div class="space-y-1">@foreach ($errors->all() as $message)<p>{{ $message }}</p>@endforeach</div>
+        </div>
+    @endif
+
+    @if ($reservation->isOverdue())
+        <div class="mb-6 rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-800">
+            <strong>Overdue:</strong> this was due back on {{ $reservation->end_at->format($dateFormat) }}.
+        </div>
+    @elseif ($status === App\Enums\ReservationStatus::Pending)
         <div class="mb-6 rounded-lg border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-800">
             Waiting for the lab custodian to approve. You can still edit it while it is pending.
         </div>
@@ -98,8 +110,10 @@
             </x-card>
         </div>
 
-        {{-- ===== Right: borrower + timeline ===== --}}
+        {{-- ===== Right: actions + borrower + timeline ===== --}}
         <div class="space-y-6">
+            @include('reservations._actions')
+
             <x-card title="Borrower">
                 <p class="font-medium text-ink">{{ $reservation->user->name }}</p>
                 <p class="text-sm text-muted">{{ $reservation->user->role->label() }} · {{ $reservation->user->id_number }}</p>

@@ -2,6 +2,8 @@
 
 namespace App\Services;
 
+use App\Enums\EquipmentCondition;
+use App\Enums\EquipmentStatus;
 use App\Enums\ReservationStatus;
 use App\Enums\UserRole;
 use App\Models\Equipment;
@@ -75,6 +77,46 @@ class ReservationService
                 'room_id' => $roomId,
             ]);
             $reservation->equipment()->sync($itemIds);
+
+            return $reservation;
+        });
+    }
+
+    /**
+     * FR-R4: the ONLY way a reservation's status changes. Every action (cancel, approve, reject,
+     * release, receive) calls this method, so the status flow is enforced in one place:
+     *
+     *   pending  -> approved | rejected | cancelled
+     *   approved -> released | cancelled
+     *   released -> returned
+     *
+     * $data holds the extra input some steps need:
+     *   rejected: ['rejection_reason' => '...']
+     *   released: ['conditions' => [equipment_id => 'good'|'fair'|'poor']]
+     *   returned: ['conditions' => [equipment_id => 'good'|'fair'|'poor'|'damaged'], 'remarks' => '...']
+     */
+    public function transition(Reservation $reservation, ReservationStatus $to, User $actor, array $data = []): Reservation
+    {
+        $from = $reservation->status;
+
+        // The allowed moves are defined in the ReservationStatus enum (allowedTransitions()).
+        if (! $from->canTransitionTo($to)) {
+            throw ValidationException::withMessages([
+                'status' => "A {$from->label()} reservation cannot be changed to {$to->label()}.",
+            ]);
+        }
+
+        return DB::transaction(function () use ($reservation, $to, $actor, $data) {
+            match ($to) {
+                ReservationStatus::Approved => $this->applyApproval($reservation, $actor),
+                ReservationStatus::Rejected => $this->applyRejection($reservation, $actor, $data),
+                ReservationStatus::Released => $this->applyRelease($reservation, $data),
+                ReservationStatus::Returned => $this->applyReturn($reservation, $data),
+                ReservationStatus::Cancelled, ReservationStatus::Pending => null, // nothing extra to record
+            };
+
+            $reservation->status = $to;
+            $reservation->save();
 
             return $reservation;
         });
@@ -156,6 +198,77 @@ class ReservationService
         }
 
         throw ValidationException::withMessages($messages);
+    }
+
+    // ---------- status-change steps (called only from transition()) ----------
+
+    /** Approving runs the conflict check again (FR-R2): something may have been approved since the request. */
+    private function applyApproval(Reservation $reservation, User $admin): void
+    {
+        $itemIds = $reservation->equipment()->pluck('equipment.id')->all();
+
+        $this->lockResources($itemIds, $reservation->room_id);
+        $this->ensureItemsStillUsable($reservation);
+        $this->ensureNoConflicts($reservation->start_at, $reservation->end_at, $itemIds, $reservation->room_id, ignoreId: $reservation->id);
+
+        $reservation->approved_by = $admin->id;
+        $reservation->approved_at = now();
+    }
+
+    private function applyRejection(Reservation $reservation, User $admin, array $data): void
+    {
+        $reservation->rejection_reason = $data['rejection_reason'];
+        $reservation->approved_by = $admin->id; // "reviewed by": who made the decision
+    }
+
+    /** FR-R5: hand-over. Records each item's condition_out. */
+    private function applyRelease(Reservation $reservation, array $data): void
+    {
+        $this->ensureItemsStillUsable($reservation);
+
+        foreach ($reservation->equipment as $item) {
+            $reservation->equipment()->updateExistingPivot($item->id, [
+                'condition_out' => $data['conditions'][$item->id],
+            ]);
+        }
+
+        $reservation->released_at = now();
+    }
+
+    /** FR-R6: return. Records each item's condition_in and the remarks. */
+    private function applyReturn(Reservation $reservation, array $data): void
+    {
+        foreach ($reservation->equipment as $item) {
+            $condition = $data['conditions'][$item->id];
+            $reservation->equipment()->updateExistingPivot($item->id, ['condition_in' => $condition]);
+
+            // Keep the inventory up to date. "damaged" is handled by a damage report instead (FR-R6, FR-D3).
+            if ($condition !== EquipmentCondition::Damaged->value) {
+                $item->update(['condition' => $condition]);
+            }
+        }
+
+        $reservation->returned_at = now();
+        $reservation->remarks = $data['remarks'] ?? null;
+    }
+
+    /** Items that went under maintenance, were retired, or deleted after the request cannot be approved or handed over. */
+    private function ensureItemsStillUsable(Reservation $reservation): void
+    {
+        $unusable = $reservation->equipment()
+            ->get()
+            ->filter(fn (Equipment $item) => $item->trashed() || $item->status !== EquipmentStatus::Available);
+
+        if ($unusable->isNotEmpty()) {
+            throw ValidationException::withMessages([
+                'status' => $unusable->map(fn ($item) => "{$item->asset_tag} {$item->name} is "
+                    . ($item->trashed() ? 'deleted' : strtolower($item->status->label())) . ' and cannot be lent out.')->all(),
+            ]);
+        }
+
+        if ($reservation->room && ! $reservation->room->is_active) {
+            throw ValidationException::withMessages(['status' => "{$reservation->room->name} is inactive and cannot be used."]);
+        }
     }
 
     // ---------- helpers ----------

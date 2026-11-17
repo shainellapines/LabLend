@@ -8,7 +8,6 @@ use App\Models\User;
 
 /**
  * Borrowers see and edit their own reservations; the admin sees all of them.
- * (Cancel, approve, reject, release, receive are added in step 2.5.)
  */
 class ReservationPolicy
 {
@@ -25,6 +24,21 @@ class ReservationPolicy
     public function create(User $user): bool
     {
         return true; // any logged-in, active user (borrowing rules are checked in ReservationService)
+    }
+
+    /**
+     * FR-R4: borrowers cancel their own reservations; the admin can cancel any.
+     * WHICH statuses can be cancelled (pending/approved) is checked by ReservationService::transition().
+     */
+    public function cancel(User $user, Reservation $reservation): bool
+    {
+        return $user->isAdmin() || (int) $reservation->user_id === $user->id;
+    }
+
+    /** FR-R4: only the admin approves, rejects, releases, and receives. */
+    public function manage(User $user, Reservation $reservation): bool
+    {
+        return $user->isAdmin();
     }
 
     /** FR-R9: only the borrower, and only while the reservation is still pending. */

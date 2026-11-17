@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Enums\ReservationStatus;
 use App\Http\Requests\ReservationRequest;
 use App\Models\Equipment;
 use App\Models\Reservation;
@@ -70,6 +71,16 @@ class ReservationController extends Controller
 
         return redirect()->route('reservations.show', $reservation)
             ->with('success', "Reservation {$reservation->reference_no} was updated.");
+    }
+
+    /** FR-R4: borrowers cancel their own pending/approved reservations (the service refuses other statuses). */
+    public function cancel(Request $request, Reservation $reservation): RedirectResponse
+    {
+        $this->authorize('cancel', $reservation);
+
+        $this->reservations->transition($reservation, ReservationStatus::Cancelled, $request->user());
+
+        return back()->with('success', "{$reservation->reference_no} was cancelled.");
     }
 
     /** Items grouped by category, and rooms, for the pickers. Only reservable ones are offered. */
