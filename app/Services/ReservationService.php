@@ -10,8 +10,12 @@ use App\Models\Equipment;
 use App\Models\Reservation;
 use App\Models\Room;
 use App\Models\User;
+use App\Notifications\NewReservationRequest;
+use App\Notifications\ReservationApproved;
+use App\Notifications\ReservationRejected;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Notification;
 use Illuminate\Support\Str;
 use Illuminate\Validation\ValidationException;
 
@@ -35,7 +39,7 @@ class ReservationService
 
         // A transaction: either the reservation AND its item rows are all saved, or nothing is.
         // Throwing an exception inside it (e.g. a conflict) automatically undoes everything.
-        return DB::transaction(function () use ($user, $data) {
+        $reservation = DB::transaction(function () use ($user, $data) {
             [$start, $end, $itemIds, $roomId] = $this->extract($data);
 
             $this->lockResources($itemIds, $roomId);
@@ -59,6 +63,14 @@ class ReservationService
 
             return $reservation;
         });
+
+        // FR-N1: tell every active admin (bell only). Sent after the transaction, so it is never sent for a rolled-back save.
+        $this->notifySafely(fn () => Notification::send(
+            User::where('role', UserRole::Admin)->where('is_active', true)->get(),
+            new NewReservationRequest($reservation)
+        ));
+
+        return $reservation;
     }
 
     /** FR-R9: the borrower edits a pending reservation. Same conflict check, ignoring the reservation itself. */
@@ -106,7 +118,7 @@ class ReservationService
             ]);
         }
 
-        return DB::transaction(function () use ($reservation, $to, $actor, $data) {
+        DB::transaction(function () use ($reservation, $to, $actor, $data) {
             match ($to) {
                 ReservationStatus::Approved => $this->applyApproval($reservation, $actor),
                 ReservationStatus::Rejected => $this->applyRejection($reservation, $actor, $data),
@@ -117,9 +129,16 @@ class ReservationService
 
             $reservation->status = $to;
             $reservation->save();
-
-            return $reservation;
         });
+
+        // FR-N1: tell the borrower by email + bell (after the transaction succeeded).
+        $this->notifySafely(fn () => match ($to) {
+            ReservationStatus::Approved => $reservation->user->notify(new ReservationApproved($reservation)),
+            ReservationStatus::Rejected => $reservation->user->notify(new ReservationRejected($reservation)),
+            default => null,
+        });
+
+        return $reservation;
     }
 
     /**
@@ -272,6 +291,19 @@ class ReservationService
     }
 
     // ---------- helpers ----------
+
+    /**
+     * The reservation is already saved at this point. If sending fails (e.g. wrong SMTP settings),
+     * log the error instead of showing an error page for an action that actually succeeded (section 9.5).
+     */
+    private function notifySafely(callable $send): void
+    {
+        try {
+            $send();
+        } catch (\Throwable $e) {
+            report($e);
+        }
+    }
 
     private function extract(array $data): array
     {

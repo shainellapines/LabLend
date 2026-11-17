@@ -29,5 +29,14 @@ class AppServiceProvider extends ServiceProvider
                 ? Reservation::where('status', ReservationStatus::Pending)->count()
                 : 0);
         });
+
+        // Same idea for the bell in the top bar (FR-N2): unread count + the 8 newest notifications.
+        View::composer('layouts.topbar', function ($view) {
+            $user = auth()->user();
+            $view->with([
+                'unreadCount' => $user ? $user->unreadNotifications()->count() : 0,
+                'latestNotifications' => $user ? $user->notifications()->limit(8)->get() : collect(),
+            ]);
+        });
     }
 }

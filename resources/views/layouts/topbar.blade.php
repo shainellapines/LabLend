@@ -19,13 +19,45 @@
         {{ now()->format('D, M d, Y') }}
     </span>
 
-    <!-- Notification bell (placeholder; unread count + dropdown come in step 3.1) -->
-    <button type="button" class="rounded-lg p-2 text-muted hover:bg-canvas hover:text-ink" title="Notifications">
-        <span class="sr-only">Notifications</span>
-        <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
-            <path stroke-linecap="round" stroke-linejoin="round" d="M14.857 17.082a23.848 23.848 0 005.454-1.31A8.967 8.967 0 0118 9.75V9A6 6 0 006 9v.75a8.967 8.967 0 01-2.312 6.022c1.733.64 3.56 1.085 5.455 1.31m5.714 0a24.255 24.255 0 01-5.714 0m5.714 0a3 3 0 11-5.714 0" />
-        </svg>
-    </button>
+    {{-- Notification bell (FR-N2). $unreadCount and $latestNotifications come from the view composer in AppServiceProvider. --}}
+    <div class="relative" x-data="{ open: false }" @click.outside="open = false" @keydown.escape.window="open = false">
+        <button type="button" @click="open = ! open" class="relative rounded-lg p-2 text-muted hover:bg-canvas hover:text-ink" title="Notifications">
+            <span class="sr-only">Notifications</span>
+            <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M14.857 17.082a23.848 23.848 0 005.454-1.31A8.967 8.967 0 0118 9.75V9A6 6 0 006 9v.75a8.967 8.967 0 01-2.312 6.022c1.733.64 3.56 1.085 5.455 1.31m5.714 0a24.255 24.255 0 01-5.714 0m5.714 0a3 3 0 11-5.714 0" />
+            </svg>
+            @if ($unreadCount > 0)
+                <span class="absolute right-1 top-1 flex h-4 min-w-4 items-center justify-center rounded-full bg-red-600 px-1 text-[10px] font-bold text-white" data-unread="{{ $unreadCount }}">
+                    {{ $unreadCount > 9 ? '9+' : $unreadCount }}
+                </span>
+            @endif
+        </button>
+
+        <div x-show="open" x-transition.origin.top.right style="display: none;"
+             class="absolute right-0 z-50 mt-2 w-80 max-w-[calc(100vw-2rem)] overflow-hidden rounded-xl border border-line bg-white shadow-lg">
+            <div class="flex items-center justify-between border-b border-line px-4 py-3">
+                <p class="text-sm font-semibold text-ink">Notifications</p>
+                @if ($unreadCount > 0)
+                    <form method="POST" action="{{ route('notifications.read-all') }}">
+                        @csrf @method('PATCH')
+                        <button class="text-xs font-medium text-primary-600 hover:text-primary-800">Mark all as read</button>
+                    </form>
+                @endif
+            </div>
+
+            <ul class="max-h-96 divide-y divide-line overflow-y-auto">
+                @forelse ($latestNotifications as $notification)
+                    <li>
+                        <x-notification-item :notification="$notification" />
+                    </li>
+                @empty
+                    <li class="px-4 py-8 text-center text-sm text-muted">You're all caught up.</li>
+                @endforelse
+            </ul>
+
+            <a href="{{ route('notifications.index') }}" class="block border-t border-line px-4 py-2.5 text-center text-sm font-medium text-primary-600 hover:bg-canvas">View all</a>
+        </div>
+    </div>
 
     <!-- User menu -->
     <x-dropdown align="right" width="48">

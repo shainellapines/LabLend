@@ -491,7 +491,7 @@ Work top to bottom. Tick each item when done.
 - [x] 2.8 Admin user management (FR-U2, U3)
 
 ### Phase 3 — Stand-out features (Days 10–12)
-- [ ] 3.1 Notifications: mail + database, bell dropdown (FR-N1, N2)
+- [x] 3.1 Notifications: mail + database, bell dropdown (FR-N1, N2)
 - [ ] 3.2 Overdue reminders command + scheduler + borrowing block for overdue users (FR-N3, FR-R3) + test
 - [ ] 3.3 QR code on item page + printable QR label sheet PDF (FR-E4)
 - [ ] 3.4 Availability JSON endpoint + live "unavailable" hints in the reservation form
