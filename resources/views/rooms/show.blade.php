@@ -22,13 +22,19 @@
                 <p class="mt-1 text-sm text-muted">{{ $room->location ?: 'No location set' }}</p>
             </div>
 
-            @if ($isAdmin)
-                <div class="flex shrink-0 items-center gap-3">
+            <div class="flex shrink-0 items-center gap-3">
+                @if ($isAdmin)
                     <x-confirm-delete :action="route('admin.rooms.destroy', $room)" title="Delete room"
                                       message="Delete &quot;{{ $room->name }}&quot;? Past reservations are kept but will no longer show this room." />
                     <x-link-button :href="route('admin.rooms.edit', $room)" variant="secondary">Edit</x-link-button>
-                </div>
-            @endif
+                @endif
+                @if ($room->is_active)
+                    <x-link-button :href="route('reservations.create', ['room' => $room->id])">
+                        <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15" /></svg>
+                        Reserve this room
+                    </x-link-button>
+                @endif
+            </div>
         </div>
     </div>
 

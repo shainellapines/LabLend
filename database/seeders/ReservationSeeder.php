@@ -62,6 +62,7 @@ class ReservationSeeder extends Seeder
 
         // Overdue: student borrowed a projector yesterday 1–3 PM and never returned it.
         // Not student@lablend.test: that account must be able to make a new reservation in demo step 4.
+        $demoStudent = $students->first();    // student@lablend.test (Juan Dela Cruz)
         $overdueBorrower = $students->last(); // student5@lablend.test (Paolo Ramos)
         $overdueItem = $items->firstWhere('asset_tag', 'PRJ-0002');
         $this->plan($overdueBorrower, [$overdueItem], null,
@@ -101,11 +102,13 @@ class ReservationSeeder extends Seeder
                     continue;
                 }
 
-                $status = $this->statusFor($start, $end);
+                $status = $this->statusFor($end);
 
-                // Future reservations: overdue borrower is blocked (FR-R3), students max 3 active.
+                // Future reservations: the overdue borrower is blocked (FR-R3). Students stay BELOW the limit of 3
+                // so they can still make a new one in the demo: student@ (demo step 4) gets at most 1, others at most 2.
                 $pool = $end->isFuture()
-                    ? $borrowers->reject(fn ($u) => $u->is($overdueBorrower) || ($u->role === UserRole::Student && $this->activeCount($u) >= 3))
+                    ? $borrowers->reject(fn ($u) => $u->is($overdueBorrower)
+                        || ($u->role === UserRole::Student && $this->activeCount($u) >= ($u->is($demoStudent) ? 1 : 2)))
                     : $borrowers;
 
                 $chosenItems = $this->freeItems($randomItems, $day, fake()->numberBetween(1, 3));
@@ -133,7 +136,7 @@ class ReservationSeeder extends Seeder
     }
 
     /** Status that makes sense for the reservation's time: past ones mostly returned, future ones pending/approved. */
-    private function statusFor(CarbonImmutable $start, CarbonImmutable $end): ReservationStatus
+    private function statusFor(CarbonImmutable $end): ReservationStatus
     {
         if ($end->isPast()) {
             return fake()->randomElement([

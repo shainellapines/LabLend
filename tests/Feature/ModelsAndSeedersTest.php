@@ -98,6 +98,13 @@ class ModelsAndSeedersTest extends TestCase
         // student@lablend.test is not the overdue borrower (they make a new reservation in the demo).
         $overdueBorrower = Reservation::overdue()->first()->user;
         $this->assertNotSame('student@lablend.test', $overdueBorrower->email);
+
+        // Every student except the overdue one is still below the limit, so they can make a new reservation.
+        $limit = config('lablend.student_max_active');
+        foreach (User::where('role', 'student')->whereKeyNot($overdueBorrower->id)->get() as $student) {
+            $this->assertLessThan($limit, $student->reservations()->active()->count(), "{$student->email} is at the limit.");
+        }
+        $this->assertLessThanOrEqual(1, User::where('email', 'student@lablend.test')->first()->reservations()->active()->count());
     }
 
     public function test_seed_data_has_no_double_bookings(): void

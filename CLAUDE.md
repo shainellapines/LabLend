@@ -484,7 +484,7 @@ Work top to bottom. Tick each item when done.
 - [x] 2.1 Equipment CRUD + photo upload + search/filters + soft delete (FR-E1, E2, E5, E6)
 - [x] 2.2 Equipment detail page with computed availability + history (FR-E3)
 - [x] 2.3 Rooms CRUD + detail page (FR-RM1, RM2)
-- [ ] 2.4 Reservation create/edit with validation rules and **conflict check** in `ReservationService` (FR-R1–R3, R9) + feature tests
+- [x] 2.4 Reservation create/edit with validation rules and **conflict check** in `ReservationService` (FR-R1–R3, R9) + feature tests
 - [ ] 2.5 Status flow: cancel, approve/reject, release, receive with item conditions (FR-R4–R7) + feature tests
 - [ ] 2.6 Reservation lists: My Reservations tabs + admin requests list with filters and quick actions (FR-R8)
 - [ ] 2.7 Damage reports CRUD + automatic equipment status change (FR-D1–D3)

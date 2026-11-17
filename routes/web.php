@@ -3,6 +3,7 @@
 use App\Http\Controllers\Admin;
 use App\Http\Controllers\EquipmentController;
 use App\Http\Controllers\ProfileController;
+use App\Http\Controllers\ReservationController;
 use App\Http\Controllers\RoomController;
 use Illuminate\Support\Facades\Route;
 
@@ -30,6 +31,9 @@ Route::middleware(['auth', 'active'])->group(function () {
     // Rooms: everyone can browse; changes are under /admin below.
     Route::get('/rooms', [RoomController::class, 'index'])->name('rooms.index');
     Route::get('/rooms/{room}', [RoomController::class, 'show'])->name('rooms.show');
+
+    // Reservations (borrower side). index (My Reservations) comes in step 2.6.
+    Route::resource('reservations', ReservationController::class)->only('create', 'store', 'show', 'edit', 'update');
 
     // Admin-only pages: URLs start with /admin, route names start with "admin.".
     Route::middleware('role:admin')->prefix('admin')->name('admin.')->group(function () {
