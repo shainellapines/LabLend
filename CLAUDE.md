@@ -488,7 +488,7 @@ Work top to bottom. Tick each item when done.
 - [x] 2.5 Status flow: cancel, approve/reject, release, receive with item conditions (FR-R4–R7) + feature tests
 - [x] 2.6 Reservation lists: My Reservations tabs + admin requests list with filters and quick actions (FR-R8)
 - [x] 2.7 Damage reports CRUD + automatic equipment status change (FR-D1–D3) — also change `Admin\ReservationActionController@receive` to redirect to the pre-filled damage report form when an item comes back `damaged` (FR-R6)
-- [ ] 2.8 Admin user management (FR-U2, U3)
+- [x] 2.8 Admin user management (FR-U2, U3)
 
 ### Phase 3 — Stand-out features (Days 10–12)
 - [ ] 3.1 Notifications: mail + database, bell dropdown (FR-N1, N2)

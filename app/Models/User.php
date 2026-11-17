@@ -7,6 +7,7 @@ use App\Enums\UserRole;
 use Database\Factories\UserFactory;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Attributes\Hidden;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Foundation\Auth\User as Authenticatable;
@@ -46,6 +47,18 @@ class User extends Authenticatable
     public function damageReports(): HasMany
     {
         return $this->hasMany(DamageReport::class, 'reported_by');
+    }
+
+    /** Admin user list: search name/email/ID number, filter by role and active/inactive. */
+    public function scopeFilter(Builder $query, array $filters): Builder
+    {
+        return $query
+            ->when($filters['search'] ?? null, fn (Builder $q, string $term) => $q->where(fn (Builder $q) => $q
+                ->where('name', 'like', "%{$term}%")
+                ->orWhere('email', 'like', "%{$term}%")
+                ->orWhere('id_number', 'like', "%{$term}%")))
+            ->when($filters['role'] ?? null, fn (Builder $q, $role) => $q->where('role', $role))
+            ->when(in_array($filters['active'] ?? null, ['1', '0'], true), fn (Builder $q) => $q->where('is_active', $filters['active'] === '1'));
     }
 
     public function isAdmin(): bool

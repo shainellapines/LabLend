@@ -49,6 +49,9 @@ Route::middleware(['auth', 'active'])->group(function () {
         Route::resource('equipment', Admin\EquipmentController::class)->except('index', 'show');
         Route::resource('rooms', Admin\RoomController::class)->except('index', 'show');
 
+        Route::resource('users', Admin\UserController::class)->only('index', 'show', 'edit', 'update');
+        Route::patch('users/{user}/toggle-active', [Admin\UserController::class, 'toggleActive'])->name('users.toggle-active');
+
         Route::patch('damage-reports/{damageReport}', [Admin\DamageReportController::class, 'update'])->name('damage-reports.update');
         Route::delete('damage-reports/{damageReport}', [Admin\DamageReportController::class, 'destroy'])->name('damage-reports.destroy');
 
