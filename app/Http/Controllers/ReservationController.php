@@ -22,6 +22,23 @@ class ReservationController extends Controller
     {
     }
 
+    /** FR-R8: "My Reservations" with Upcoming / Active / History tabs (?tab=...). */
+    public function index(Request $request): View
+    {
+        $tab = in_array($request->query('tab'), ['upcoming', 'active', 'history']) ? $request->query('tab') : 'upcoming';
+        $mine = fn () => $request->user()->reservations();
+
+        $reservations = $mine()->forTab($tab)
+            ->with('equipment', 'room') // eager load for the "items · room" summary
+            ->orderBy('start_at', $tab === 'history' ? 'desc' : 'asc')
+            ->paginate(15)
+            ->withQueryString();
+
+        $counts = collect(['upcoming', 'active', 'history'])->mapWithKeys(fn ($t) => [$t => $mine()->forTab($t)->count()]);
+
+        return view('reservations.index', compact('reservations', 'tab', 'counts'));
+    }
+
     /** ?equipment=5 or ?room=2 pre-selects an item/room (from the "Reserve" buttons on their pages). */
     public function create(Request $request): View
     {

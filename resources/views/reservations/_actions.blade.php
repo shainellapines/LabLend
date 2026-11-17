@@ -61,7 +61,7 @@
     {{-- ===== Modals (re-open automatically if their form had a validation error) ===== --}}
 
     @if ($isManager && $can(S::Rejected))
-        <x-modal name="reject" :show="$errors->has('rejection_reason')" maxWidth="md" focusable>
+        <x-modal name="reject" :show="$errors->has('rejection_reason') || request('action') === 'reject'" maxWidth="md" focusable>
             <form method="POST" action="{{ route('admin.reservations.reject', $reservation) }}" class="p-6">
                 @csrf @method('PATCH')
                 <h2 class="text-lg font-semibold text-ink">Reject {{ $reservation->reference_no }}</h2>
@@ -83,7 +83,7 @@
             $releasing = $can(S::Released);
             $conditions = $releasing ? EquipmentCondition::forEquipment() : EquipmentCondition::cases();
         @endphp
-        <x-modal :name="$releasing ? 'release' : 'receive'" :show="$errors->has('conditions.*')" maxWidth="lg" focusable>
+        <x-modal :name="$releasing ? 'release' : 'receive'" :show="$errors->has('conditions.*') || request('action') === ($releasing ? 'release' : 'receive')" maxWidth="lg" focusable>
             <form method="POST" action="{{ route($releasing ? 'admin.reservations.release' : 'admin.reservations.receive', $reservation) }}" class="p-6">
                 @csrf @method('PATCH')
                 <h2 class="text-lg font-semibold text-ink">{{ $releasing ? 'Release' : 'Receive' }} {{ $reservation->reference_no }}</h2>

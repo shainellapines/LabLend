@@ -32,8 +32,8 @@ Route::middleware(['auth', 'active'])->group(function () {
     Route::get('/rooms', [RoomController::class, 'index'])->name('rooms.index');
     Route::get('/rooms/{room}', [RoomController::class, 'show'])->name('rooms.show');
 
-    // Reservations (borrower side). index (My Reservations) comes in step 2.6.
-    Route::resource('reservations', ReservationController::class)->only('create', 'store', 'show', 'edit', 'update');
+    // Reservations (borrower side). index = "My Reservations".
+    Route::resource('reservations', ReservationController::class)->only('index', 'create', 'store', 'show', 'edit', 'update');
     Route::patch('/reservations/{reservation}/cancel', [ReservationController::class, 'cancel'])->name('reservations.cancel');
 
     // Admin-only pages: URLs start with /admin, route names start with "admin.".
@@ -43,7 +43,8 @@ Route::middleware(['auth', 'active'])->group(function () {
         Route::resource('equipment', Admin\EquipmentController::class)->except('index', 'show');
         Route::resource('rooms', Admin\RoomController::class)->except('index', 'show');
 
-        // Reservation status actions (FR-R4–R6). All go through ReservationService::transition().
+        // Requests list + reservation status actions (FR-R4–R8). Actions go through ReservationService::transition().
+        Route::get('reservations', [Admin\ReservationActionController::class, 'index'])->name('reservations.index');
         Route::controller(Admin\ReservationActionController::class)->prefix('reservations/{reservation}')->name('reservations.')->group(function () {
             Route::patch('approve', 'approve')->name('approve');
             Route::patch('reject', 'reject')->name('reject');

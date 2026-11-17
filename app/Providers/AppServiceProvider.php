@@ -2,6 +2,9 @@
 
 namespace App\Providers;
 
+use App\Enums\ReservationStatus;
+use App\Models\Reservation;
+use Illuminate\Support\Facades\View;
 use Illuminate\Support\ServiceProvider;
 
 class AppServiceProvider extends ServiceProvider
@@ -19,6 +22,12 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
-        //
+        // View composer: runs every time layouts/sidebar.blade.php is rendered and hands it $pendingCount.
+        // This keeps the query out of the Blade view (MVC) while every page still gets the badge.
+        View::composer('layouts.sidebar', function ($view) {
+            $view->with('pendingCount', auth()->user()?->isAdmin()
+                ? Reservation::where('status', ReservationStatus::Pending)->count()
+                : 0);
+        });
     }
 }
