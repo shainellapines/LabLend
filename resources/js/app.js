@@ -13,6 +13,11 @@ const muted = '#64748B';
 const line = '#E3E9ED';
 const azure = '#00638E';
 
+// Use the app's font (Figtree) and muted ink in every chart.
+Chart.defaults.font.family = "Figtree, ui-sans-serif, system-ui, sans-serif";
+Chart.defaults.font.size = 12;
+Chart.defaults.color = muted;
+
 Alpine.data('chart', ({ type, labels, values, label }) => ({
     init() {
         const isBar = type === 'bar';
@@ -38,7 +43,8 @@ Alpine.data('chart', ({ type, labels, values, label }) => ({
                     pointHoverBorderColor: '#FFFFFF',
                     pointHoverBorderWidth: 2,
                     fill: !isBar,
-                    tension: 0.3,
+                    // "monotone" smooths the line without overshooting: it never dips below or above the real values.
+                    cubicInterpolationMode: 'monotone',
                 }],
             },
             options: {

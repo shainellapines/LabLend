@@ -1,3 +1,8 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+/* Alpine: hide elements marked x-cloak until Alpine has started, so nothing flashes on page load. */
+[x-cloak] {
+    display: none !important;
+}

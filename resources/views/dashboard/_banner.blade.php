@@ -11,7 +11,7 @@
     <div class="relative flex flex-col gap-5 sm:flex-row sm:items-end sm:justify-between">
         <div>
             <p class="text-sm font-medium text-primary-200">{{ now()->format('l, F j, Y') }}</p>
-            <h2 class="mt-1 text-2xl font-semibold sm:text-3xl">{{ $greeting }}, {{ Str::before(Auth::user()->name, ' ') }}</h2>
+            <h2 class="mt-1 text-2xl font-semibold sm:text-3xl">{{ $greeting }}, {{ Auth::user()->name }}</h2>
             <p class="mt-2 max-w-xl text-sm text-white/70">{{ $subtitle }}</p>
         </div>
 

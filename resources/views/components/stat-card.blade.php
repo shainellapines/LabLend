@@ -22,7 +22,7 @@
     {{ $attributes->merge(['class' => 'group block rounded-xl border border-line bg-white p-5 shadow-card transition' . ($href ? ' hover:border-primary-200 hover:shadow-md' : '')]) }}>
     <div class="flex items-start justify-between gap-4">
         <div class="min-w-0">
-            <p class="truncate text-sm font-medium text-muted">{{ $label }}</p>
+            <p class="text-sm font-medium leading-snug text-muted">{{ $label }}</p>
             <p class="mt-2 text-3xl font-semibold tabular-nums tracking-tight text-ink">{{ $value }}</p>
         </div>
         <span class="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg {{ $toneClasses }}">

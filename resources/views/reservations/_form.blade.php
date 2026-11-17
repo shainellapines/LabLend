@@ -54,11 +54,11 @@
         </p>
 
         <p class="mt-2 text-xs" aria-live="polite">
-            <span x-show="status === 'loading'" class="text-muted">Checking availability…</span>
-            <span x-show="status === 'done' && takenCount === 0" class="font-medium text-green-700">Everything is free at this time.</span>
-            <span x-show="status === 'done' && takenCount > 0" class="font-medium text-amber-700"
+            <span x-cloak x-show="status === 'loading'" class="text-muted">Checking availability…</span>
+            <span x-cloak x-show="status === 'done' && takenCount === 0" class="font-medium text-green-700">Everything is free at this time.</span>
+            <span x-cloak x-show="status === 'done' && takenCount > 0" class="font-medium text-amber-700"
                   x-text="takenCount + ' item(s)/room(s) are already reserved at this time and are marked below.'"></span>
-            <span x-show="status === 'error'" class="text-muted">Could not check availability; it will be checked when you submit.</span>
+            <span x-cloak x-show="status === 'error'" class="text-muted">Could not check availability; it will be checked when you submit.</span>
         </p>
     </section>
 
@@ -70,7 +70,7 @@
             <div class="flex items-center gap-3">
                 <span class="flex h-7 w-7 items-center justify-center rounded-full bg-primary-600 text-xs font-semibold text-white">2</span>
                 <h3 class="text-sm font-semibold text-ink">Equipment</h3>
-                <span class="rounded-full bg-primary-50 px-2 py-0.5 text-xs font-semibold text-primary-700" x-text="count + ' selected'"></span>
+                <span x-cloak class="rounded-full bg-primary-50 px-2 py-0.5 text-xs font-semibold text-primary-700" x-text="count + ' selected'"></span>
             </div>
             <input type="search" x-model="q" placeholder="Filter items..."
                    class="w-full rounded-lg border-line text-sm shadow-sm focus:border-primary-500 focus:ring-primary-500 sm:w-64">
