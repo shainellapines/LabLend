@@ -105,6 +105,14 @@ class ModelsAndSeedersTest extends TestCase
             $this->assertLessThan($limit, $student->reservations()->active()->count(), "{$student->email} is at the limit.");
         }
         $this->assertLessThanOrEqual(1, User::where('email', 'student@lablend.test')->first()->reservations()->active()->count());
+
+        // Demo step 4: tomorrow 1–3 PM, PRJ-0001 is taken and the other available projectors are free.
+        $start = today()->addDay()->setTime(13, 0);
+        $taken = app(\App\Services\ReservationService::class)->unavailableBetween($start, $start->copy()->addHours(2));
+        $this->assertArrayHasKey(Equipment::where('asset_tag', 'PRJ-0001')->value('id'), $taken['equipment']);
+        foreach (['PRJ-0003', 'PRJ-0004', 'PRJ-0005'] as $tag) {
+            $this->assertArrayNotHasKey(Equipment::where('asset_tag', $tag)->value('id'), $taken['equipment'], "{$tag} should be free.");
+        }
     }
 
     public function test_seed_data_has_no_double_bookings(): void

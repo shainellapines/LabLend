@@ -82,6 +82,17 @@ class ReservationSeeder extends Seeder
             ReservationStatus::Returned, 'Org general assembly');
         $this->plans[$damagePlanIndex]['damaged'] = [$damagedItem->id];
 
+        // Demo step 4: tomorrow 1:00–3:00 PM, PRJ-0001 is already booked (approved), so the reservation form
+        // marks it as unavailable. The other available projectors are kept free all day tomorrow, so the
+        // student can "pick another one".
+        $tomorrow = $today->addDay();
+        $this->plan($faculty->last(), [$items->firstWhere('asset_tag', 'PRJ-0001')], null,
+            $tomorrow->setTime(13, 0), $tomorrow->setTime(15, 0),
+            ReservationStatus::Approved, 'Faculty seminar');
+        foreach (['PRJ-0003', 'PRJ-0004', 'PRJ-0005'] as $tag) {
+            $this->usedPerDay[$tomorrow->toDateString()]['items'][] = $items->firstWhere('asset_tag', $tag)->id;
+        }
+
         // Items that are out or broken are never used by the generated reservations.
         $randomItems = $items->reject(fn ($item) => in_array($item->id, [$overdueItem->id, $longItem->id, $damagedItem->id]));
 
