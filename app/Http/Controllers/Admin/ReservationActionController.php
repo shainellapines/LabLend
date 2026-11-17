@@ -74,10 +74,12 @@ class ReservationActionController extends Controller
     {
         $this->reservations->transition($reservation, ReservationStatus::Returned, $request->user(), $request->validated());
 
+        // FR-R6: if anything came back damaged, open the "Create damage report" form pre-filled for that item.
         $damaged = collect($request->validated('conditions', []))->filter(fn ($c) => $c === EquipmentCondition::Damaged->value);
         if ($damaged->isNotEmpty()) {
-            // FR-R6: step 2.7 changes this to open the pre-filled "Create damage report" form.
-            return redirect()->route('reservations.show', $reservation)->with('error', "{$reservation->reference_no} was returned with {$damaged->count()} damaged item(s). Please file a damage report.");
+            return redirect()
+                ->route('damage-reports.create', ['equipment' => $damaged->keys()->first(), 'reservation' => $reservation->id])
+                ->with('error', "{$reservation->reference_no} was returned with {$damaged->count()} damaged item(s). Please describe the damage.");
         }
 
         return redirect()->route('reservations.show', $reservation)->with('success', "{$reservation->reference_no} was returned.");

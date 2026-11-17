@@ -26,4 +26,17 @@ enum DamageStatus: string
             self::Resolved => 'green',
         };
     }
+
+    /**
+     * Reports only move forward. Open may go straight to Resolved (e.g. a lost item that was found,
+     * or a minor issue fixed on the spot). Staying in the same status is allowed (to update notes).
+     */
+    public function canMoveTo(self $next): bool
+    {
+        return $next === $this || match ($this) {
+            self::Open => in_array($next, [self::UnderRepair, self::Resolved], true),
+            self::UnderRepair => $next === self::Resolved,
+            self::Resolved => false,
+        };
+    }
 }

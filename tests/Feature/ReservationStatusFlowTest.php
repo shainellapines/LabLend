@@ -260,8 +260,10 @@ class ReservationStatusFlowTest extends TestCase
         $reservation = $this->reservationWithItem('released');
         $item = $reservation->equipment->first();
 
+        // FR-R6: a damaged return opens the damage report form, pre-filled for that item and reservation.
         $this->actingAs($this->admin)
             ->patch(route('admin.reservations.receive', $reservation), ['conditions' => [$item->id => 'damaged']])
+            ->assertRedirect(route('damage-reports.create', ['equipment' => $item->id, 'reservation' => $reservation->id]))
             ->assertSessionHas('error');
 
         $this->assertSame('damaged', $reservation->fresh()->equipment->first()->pivot->condition_in);

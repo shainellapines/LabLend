@@ -30,6 +30,9 @@
                         Reserve this item
                     </x-link-button>
                 @endif
+                @unless ($equipment->trashed())
+                    <x-link-button :href="route('damage-reports.create', ['equipment' => $equipment->id])" variant="secondary">Report damage</x-link-button>
+                @endunless
                 @if ($isAdmin && ! $equipment->trashed())
                     <x-link-button :href="route('admin.equipment.edit', $equipment)" variant="secondary">
                         <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M16.862 4.487l1.687-1.688a1.875 1.875 0 112.652 2.652L10.582 16.07a4.5 4.5 0 01-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 011.13-1.897l8.932-8.931z" /></svg>
