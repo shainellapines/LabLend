@@ -502,7 +502,7 @@ Work top to bottom. Tick each item when done.
 - [x] 4.1 UI consistency pass on every page (spacing, badges, empty states, mobile view)
 - [x] 4.2 Final demo seed data; known demo accounts in `README.md`
 - [ ] 4.3 Full manual test of the demo scenario (Section 14); `php artisan test` all green
-- [ ] 4.4 (Optional) `lablend:expire-pending` command (FR-N4)
+- [x] 4.4 (Optional) `lablend:expire-pending` command (FR-N4)
 - [ ] 4.5 Record presentation video; finalize PPT
 
 > If time runs short, cut in this order: 4.4 → 3.4 → charts in 3.5 (keep stat cards) → CSV export. **Never cut** the conflict check, status flow, damage reports, or overdue reminders — they are the core story.

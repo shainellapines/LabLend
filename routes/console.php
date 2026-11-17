@@ -15,3 +15,6 @@ Artisan::command('inspire', function () {
 Schedule::command('lablend:send-overdue-reminders')
     ->dailyAt(config('lablend.overdue_reminder_time')) // 08:00, from config/lablend.php
     ->timezone(config('app.timezone'));
+
+// FR-N4 (optional): every hour, cancel pending requests whose start time has passed without approval.
+Schedule::command('lablend:expire-pending')->hourly();

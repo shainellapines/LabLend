@@ -106,8 +106,11 @@ class ReservationService
      *   rejected: ['rejection_reason' => '...']
      *   released: ['conditions' => [equipment_id => 'good'|'fair'|'poor']]
      *   returned: ['conditions' => [equipment_id => 'good'|'fair'|'poor'|'damaged'], 'remarks' => '...']
+     *
+     * $actor is who does it. It may be null only for automatic cancellations (lablend:expire-pending);
+     * approve and reject always need the admin, because approved_by records who decided.
      */
-    public function transition(Reservation $reservation, ReservationStatus $to, User $actor, array $data = []): Reservation
+    public function transition(Reservation $reservation, ReservationStatus $to, ?User $actor = null, array $data = []): Reservation
     {
         $from = $reservation->status;
 
