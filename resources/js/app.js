@@ -1,6 +1,78 @@
 import Alpine from 'alpinejs';
+import Chart from 'chart.js/auto';
 
 window.Alpine = Alpine;
+
+/*
+ | Dashboard charts (step 3.5). One series per chart, so one color (Dark Azure) and no legend:
+ | the card title names the series. Thin marks, recessive grid, hover tooltips.
+ | Usage (see components/chart.blade.php): x-data="chart({ type: 'bar', labels: [...], values: [...], label: '...' })"
+ */
+const ink = '#141414';
+const muted = '#64748B';
+const line = '#E3E9ED';
+const azure = '#00638E';
+
+Alpine.data('chart', ({ type, labels, values, label }) => ({
+    init() {
+        const isBar = type === 'bar';
+
+        new Chart(this.$refs.canvas, {
+            type,
+            data: {
+                labels,
+                datasets: [{
+                    label,
+                    data: values,
+                    backgroundColor: isBar ? azure : 'rgba(0, 99, 142, 0.08)',
+                    borderColor: azure,
+                    // Bars: thin, 4px rounded at the data end only, anchored to the baseline.
+                    borderRadius: isBar ? 4 : 0,
+                    borderSkipped: 'start',
+                    maxBarThickness: 18,
+                    // Line: 2px, no dots until hover (8px).
+                    borderWidth: isBar ? 0 : 2,
+                    pointRadius: 0,
+                    pointHoverRadius: 4,
+                    pointHoverBackgroundColor: azure,
+                    pointHoverBorderColor: '#FFFFFF',
+                    pointHoverBorderWidth: 2,
+                    fill: !isBar,
+                    tension: 0.3,
+                }],
+            },
+            options: {
+                indexAxis: isBar ? 'y' : 'x', // horizontal bars: long item names stay readable
+                maintainAspectRatio: false,
+                interaction: isBar ? { mode: 'nearest', intersect: true } : { mode: 'index', intersect: false },
+                plugins: {
+                    legend: { display: false },
+                    tooltip: {
+                        backgroundColor: ink,
+                        padding: 10,
+                        cornerRadius: 8,
+                        displayColors: false,
+                        callbacks: { label: (ctx) => `${ctx.formattedValue} ${label.toLowerCase()}` },
+                    },
+                },
+                scales: {
+                    x: {
+                        grid: { color: isBar ? line : 'transparent', drawTicks: false },
+                        border: { display: false },
+                        ticks: { color: muted, padding: 8, precision: 0, maxRotation: 0, autoSkipPadding: 12 },
+                        beginAtZero: true,
+                    },
+                    y: {
+                        grid: { color: isBar ? 'transparent' : line, drawTicks: false },
+                        border: { display: false },
+                        ticks: { color: isBar ? ink : muted, padding: 8, precision: 0 },
+                        beginAtZero: true,
+                    },
+                },
+            },
+        });
+    },
+}));
 
 /*
  | Live availability hints for the reservation form (section 10.4).
