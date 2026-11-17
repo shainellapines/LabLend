@@ -493,7 +493,7 @@ Work top to bottom. Tick each item when done.
 ### Phase 3 — Stand-out features (Days 10–12)
 - [x] 3.1 Notifications: mail + database, bell dropdown (FR-N1, N2)
 - [x] 3.2 Overdue reminders command + scheduler + borrowing block for overdue users (FR-N3, FR-R3) + test
-- [ ] 3.3 QR code on item page + printable QR label sheet PDF (FR-E4)
+- [x] 3.3 QR code on item page + printable QR label sheet PDF (FR-E4)
 - [ ] 3.4 Availability JSON endpoint + live "unavailable" hints in the reservation form
 - [ ] 3.5 Dashboards with stat cards and Chart.js charts (FR-H1, H2)
 - [ ] 3.6 Reports page with PDF + CSV export; reservation slip PDF (FR-H3, FR-R10)

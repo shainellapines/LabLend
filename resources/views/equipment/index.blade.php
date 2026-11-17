@@ -4,6 +4,7 @@
     <x-page-header title="Equipment" description="All lab equipment. Only available items can be reserved.">
         <x-slot name="actions">
             @can('create', App\Models\Equipment::class)
+                <x-link-button :href="route('admin.equipment.qr-labels')" variant="secondary">Print QR labels</x-link-button>
                 <x-link-button :href="route('admin.equipment.create')">
                     <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15" /></svg>
                     New Item

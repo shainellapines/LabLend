@@ -52,6 +52,9 @@ Route::middleware(['auth', 'active'])->group(function () {
     Route::middleware('role:admin')->prefix('admin')->name('admin.')->group(function () {
         // One line = 6 routes: index, create, store, edit, update, destroy (names admin.categories.*).
         Route::resource('categories', Admin\CategoryController::class)->except('show');
+        // QR labels (FR-E4) — registered before the equipment resource so "qr-labels" is never read as an item id.
+        Route::get('equipment/qr-labels', [Admin\QrLabelController::class, 'index'])->name('equipment.qr-labels');
+        Route::get('equipment/qr-labels/pdf', [Admin\QrLabelController::class, 'pdf'])->name('equipment.qr-labels.pdf');
         Route::resource('equipment', Admin\EquipmentController::class)->except('index', 'show');
         Route::resource('rooms', Admin\RoomController::class)->except('index', 'show');
 
