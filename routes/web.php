@@ -41,6 +41,7 @@ Route::middleware(['auth', 'active'])->group(function () {
     // Reservations (borrower side). index = "My Reservations".
     Route::resource('reservations', ReservationController::class)->only('index', 'create', 'store', 'show', 'edit', 'update');
     Route::patch('/reservations/{reservation}/cancel', [ReservationController::class, 'cancel'])->name('reservations.cancel');
+    Route::get('/reservations/{reservation}/slip', [ReservationController::class, 'slip'])->name('reservations.slip');
 
     // Notifications (bell)
     Route::get('/notifications', [NotificationController::class, 'index'])->name('notifications.index');
@@ -61,6 +62,12 @@ Route::middleware(['auth', 'active'])->group(function () {
         Route::get('equipment/qr-labels/pdf', [Admin\QrLabelController::class, 'pdf'])->name('equipment.qr-labels.pdf');
         Route::resource('equipment', Admin\EquipmentController::class)->except('index', 'show');
         Route::resource('rooms', Admin\RoomController::class)->except('index', 'show');
+
+        // Reports (FR-H3)
+        Route::get('reports', [Admin\ReportController::class, 'index'])->name('reports.index');
+        Route::get('reports/{type}/export', [Admin\ReportController::class, 'export'])
+            ->whereIn('type', ['usage', 'overdue', 'damage'])
+            ->name('reports.export');
 
         Route::resource('users', Admin\UserController::class)->only('index', 'show', 'edit', 'update');
         Route::patch('users/{user}/toggle-active', [Admin\UserController::class, 'toggleActive'])->name('users.toggle-active');

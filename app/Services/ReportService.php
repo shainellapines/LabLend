@@ -2,6 +2,7 @@
 
 namespace App\Services;
 
+use App\Enums\DamageSeverity;
 use App\Enums\DamageStatus;
 use App\Enums\EquipmentStatus;
 use App\Enums\ReservationStatus;
@@ -9,6 +10,7 @@ use App\Models\DamageReport;
 use App\Models\Equipment;
 use App\Models\Reservation;
 use App\Models\User;
+use Carbon\Carbon;
 use Illuminate\Support\Collection;
 
 /**
@@ -84,6 +86,95 @@ class ReportService
         }
 
         return $series;
+    }
+
+    // ================= Reports page (FR-H3) =================
+
+    /**
+     * Usage report: how many times each item was handed over (released or returned) between $from and $to.
+     * Includes items borrowed 0 times, so the custodian can also see what is never used.
+     */
+    public function usageByItem(Carbon $from, Carbon $to): Collection
+    {
+        return Equipment::withTrashed()
+            ->with('category')
+            ->withCount(['reservations as borrow_count' => fn ($q) => $q
+                ->whereIn('reservations.status', [ReservationStatus::Released, ReservationStatus::Returned])
+                ->whereBetween('start_at', [$from, $to])])
+            ->orderByDesc('borrow_count')
+            ->orderBy('asset_tag')
+            ->get();
+    }
+
+    /** Same numbers added up per category. Collection of ['category' => 'Projectors', 'items' => 5, 'borrow_count' => 23]. */
+    public function usageByCategory(Collection $usageByItem): Collection
+    {
+        return $usageByItem
+            ->groupBy(fn (Equipment $item) => $item->category->name)
+            ->map(fn (Collection $items, string $category) => [
+                'category' => $category,
+                'items' => $items->count(),
+                'borrow_count' => $items->sum('borrow_count'),
+            ])
+            ->sortByDesc('borrow_count')
+            ->values();
+    }
+
+    /** Overdue report: everything that should have come back by now. */
+    public function overdueList(): Collection
+    {
+        return Reservation::overdue()->with('user', 'equipment', 'room')->orderBy('end_at')->get();
+    }
+
+    /** Damage summary: counts per severity and per status, plus the reports themselves, for the date range. */
+    public function damageSummary(Carbon $from, Carbon $to): array
+    {
+        $reports = DamageReport::with('equipment', 'reporter')
+            ->whereBetween('created_at', [$from, $to])
+            ->latest()
+            ->get();
+
+        return [
+            'reports' => $reports,
+            'bySeverity' => collect(DamageSeverity::cases())->mapWithKeys(fn ($s) => [$s->label() => $reports->where('severity', $s)->count()]),
+            'byStatus' => collect(DamageStatus::cases())->mapWithKeys(fn ($s) => [$s->label() => $reports->where('status', $s)->count()]),
+        ];
+    }
+
+    /**
+     * One report as a plain table, used by BOTH exports (PDF and CSV), so they always contain the same data.
+     * Returns ['title' => ..., 'headers' => [...], 'rows' => [[...], ...]].
+     */
+    public function table(string $type, Carbon $from, Carbon $to): array
+    {
+        $period = $from->format('M d, Y') . ' – ' . $to->format('M d, Y');
+        $date = 'M d, Y g:i A';
+
+        return match ($type) {
+            'usage' => [
+                'title' => "Equipment usage ({$period})",
+                'headers' => ['Asset tag', 'Item', 'Category', 'Times borrowed'],
+                'rows' => $this->usageByItem($from, $to)
+                    ->map(fn ($i) => [$i->asset_tag, $i->name . ($i->trashed() ? ' (deleted)' : ''), $i->category->name, $i->borrow_count])->all(),
+            ],
+            'overdue' => [
+                'title' => 'Overdue reservations (as of ' . now()->format($date) . ')',
+                'headers' => ['Reference', 'Borrower', 'ID number', 'Items', 'Room', 'Was due', 'Days overdue'],
+                'rows' => $this->overdueList()->map(fn ($r) => [
+                    $r->reference_no, $r->user->name, $r->user->id_number,
+                    $r->equipment->pluck('asset_tag')->implode(', ') ?: '—', $r->room?->name ?? '—',
+                    $r->end_at->format($date), (int) $r->end_at->diffInDays(now()),
+                ])->all(),
+            ],
+            'damage' => [
+                'title' => "Damage reports ({$period})",
+                'headers' => ['Reported', 'Asset tag', 'Item', 'Severity', 'Status', 'Reported by', 'Description'],
+                'rows' => $this->damageSummary($from, $to)['reports']->map(fn ($d) => [
+                    $d->created_at->format($date), $d->equipment->asset_tag, $d->equipment->name,
+                    $d->severity->label(), $d->status->label(), $d->reporter->name, $d->description,
+                ])->all(),
+            ],
+        };
     }
 
     // ================= Borrower dashboard (FR-H2) =================

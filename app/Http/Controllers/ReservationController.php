@@ -8,9 +8,11 @@ use App\Models\Equipment;
 use App\Models\Reservation;
 use App\Models\Room;
 use App\Services\ReservationService;
+use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\View\View;
+use Symfony\Component\HttpFoundation\Response;
 
 /**
  * Borrower side of reservations: create, view, edit (FR-R1, FR-R9).
@@ -98,6 +100,21 @@ class ReservationController extends Controller
         $this->reservations->transition($reservation, ReservationStatus::Cancelled, $request->user());
 
         return back()->with('success', "{$reservation->reference_no} was cancelled.");
+    }
+
+    /** FR-R10: printable reservation slip (PDF) with signature lines. Anyone who may view the reservation may print it. */
+    public function slip(Reservation $reservation): Response
+    {
+        $this->authorize('view', $reservation);
+
+        try {
+            return Pdf::loadView('pdf.reservation-slip', [
+                'reservation' => $reservation->load('user', 'approver', 'room', 'equipment.category'),
+            ])->setPaper('a4')->stream("{$reservation->reference_no}.pdf");
+        } catch (\Throwable $e) {
+            report($e); // section 9.5
+            return back()->with('error', 'The slip could not be created. Please try again.');
+        }
     }
 
     /** Items grouped by category, and rooms, for the pickers. Only reservable ones are offered. */
