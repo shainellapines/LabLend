@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\Admin;
+use App\Http\Controllers\AvailabilityController;
 use App\Http\Controllers\DamageReportController;
 use App\Http\Controllers\EquipmentController;
 use App\Http\Controllers\NotificationController;
@@ -33,6 +34,10 @@ Route::middleware(['auth', 'active'])->group(function () {
     // Rooms: everyone can browse; changes are under /admin below.
     Route::get('/rooms', [RoomController::class, 'index'])->name('rooms.index');
     Route::get('/rooms/{room}', [RoomController::class, 'show'])->name('rooms.show');
+
+    // Live availability for the reservation form (JSON). Must come before the resource,
+    // otherwise "availability" would be read as a reservation id by /reservations/{reservation}.
+    Route::get('/reservations/availability', AvailabilityController::class)->name('reservations.availability');
 
     // Reservations (borrower side). index = "My Reservations".
     Route::resource('reservations', ReservationController::class)->only('index', 'create', 'store', 'show', 'edit', 'update');

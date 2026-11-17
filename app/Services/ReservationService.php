@@ -179,6 +179,39 @@ class ReservationService
         return $conflicts;
     }
 
+    /**
+     * FR-R2 / section 10.4: everything already taken in a time slot, for the live hints in the form.
+     * Same overlap rule and same "active" statuses as the real check, so the hints match what submit will say.
+     * Returns ['equipment' => [id => 'Reserved Nov 20 1:00–3:00 PM (RSV-…)'], 'rooms' => [id => '…']].
+     * Borrower names are left out on purpose: this is shown to everyone.
+     */
+    public function unavailableBetween(Carbon $start, Carbon $end, ?int $ignoreId = null): array
+    {
+        $taken = ['equipment' => [], 'rooms' => []];
+
+        $clashing = Reservation::active()
+            ->overlapping($start, $end)
+            ->when($ignoreId, fn ($q) => $q->whereKeyNot($ignoreId))
+            ->with('equipment:id')
+            ->get();
+
+        foreach ($clashing as $reservation) {
+            $text = sprintf('Reserved %s – %s (%s)',
+                $reservation->start_at->format('M d g:i A'),
+                $reservation->end_at->format($reservation->end_at->isSameDay($reservation->start_at) ? 'g:i A' : 'M d g:i A'),
+                $reservation->reference_no);
+
+            foreach ($reservation->equipment as $item) {
+                $taken['equipment'][$item->id] = $text;
+            }
+            if ($reservation->room_id) {
+                $taken['rooms'][$reservation->room_id] = $text;
+            }
+        }
+
+        return $taken;
+    }
+
     // ---------- rules ----------
 
     /** FR-R3: users with an overdue item, and students at their limit, cannot create new reservations. */

@@ -14,7 +14,9 @@
     </div>
 @endif
 
-<div class="space-y-8">
+{{-- reservationAvailability is defined in resources/js/app.js (live "unavailable" hints, section 10.4) --}}
+<div class="space-y-8"
+     x-data="reservationAvailability({ url: @js(route('reservations.availability')), ignore: @js($reservation->id) })">
     {{-- ===== 1. When ===== --}}
     <section>
         <div class="flex items-center gap-3">
@@ -32,7 +34,7 @@
 
             <div>
                 <x-input-label for="start_at" value="Start *" />
-                <x-datetime-input name="start_at" class="mt-1 block w-full" required
+                <x-datetime-input name="start_at" class="mt-1 block w-full" required x-on:change="schedule()"
                                   :value="old('start_at', $reservation->start_at)"
                                   :min="now()->addMinutes(config('lablend.min_lead_minutes'))->format('Y-m-d\TH:i')" />
                 <x-input-error :messages="$errors->get('start_at')" class="mt-2" />
@@ -40,7 +42,7 @@
 
             <div>
                 <x-input-label for="end_at" value="End *" />
-                <x-datetime-input name="end_at" class="mt-1 block w-full" required :value="old('end_at', $reservation->end_at)" />
+                <x-datetime-input name="end_at" class="mt-1 block w-full" required x-on:change="schedule()" :value="old('end_at', $reservation->end_at)" />
                 <x-input-error :messages="$errors->get('end_at')" class="mt-2" />
             </div>
         </div>
@@ -49,6 +51,14 @@
             <svg class="mt-px h-4 w-4 shrink-0" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M11.25 11.25l.041-.02a.75.75 0 011.063.852l-.708 2.836a.75.75 0 001.063.853l.041-.021M21 12a9 9 0 11-18 0 9 9 0 0118 0zm-9-3.75h.008v.008H12V8.25z" /></svg>
             Start at least {{ config('lablend.min_lead_minutes') }} minutes from now and at most {{ config('lablend.max_days_ahead') }} days ahead.
             Your limit is {{ $maxHours }} hours per reservation.
+        </p>
+
+        <p class="mt-2 text-xs" aria-live="polite">
+            <span x-show="status === 'loading'" class="text-muted">Checking availability…</span>
+            <span x-show="status === 'done' && takenCount === 0" class="font-medium text-green-700">Everything is free at this time.</span>
+            <span x-show="status === 'done' && takenCount > 0" class="font-medium text-amber-700"
+                  x-text="takenCount + ' item(s)/room(s) are already reserved at this time and are marked below.'"></span>
+            <span x-show="status === 'error'" class="text-muted">Could not check availability; it will be checked when you submit.</span>
         </p>
     </section>
 
@@ -76,12 +86,18 @@
                         @foreach ($items as $item)
                             <label x-show="q === '' || $el.dataset.search.includes(q.toLowerCase())"
                                    data-search="{{ strtolower($item->asset_tag . ' ' . $item->name . ' ' . $categoryName) }}"
+                                   :class="isTaken('equipment', {{ $item->id }}) ? '!border-red-300 !bg-red-50' : ''"
+                                   :title="taken.equipment[{{ $item->id }}] ?? ''"
                                    class="flex cursor-pointer items-center gap-3 rounded-lg border border-line px-3 py-2 transition hover:border-primary-200 has-[:checked]:border-primary-500 has-[:checked]:bg-primary-50">
+                                {{-- A taken item cannot be newly ticked; an already-ticked one stays ticked so the user sees why it fails. --}}
                                 <input type="checkbox" name="equipment_ids[]" value="{{ $item->id }}" @checked(in_array($item->id, $selected))
-                                       class="rounded border-line text-primary-600 focus:ring-primary-500">
+                                       :disabled="isTaken('equipment', {{ $item->id }}) && ! $el.checked"
+                                       class="rounded border-line text-primary-600 focus:ring-primary-500 disabled:opacity-40">
                                 <span class="min-w-0">
                                     <span class="block truncate text-sm font-medium text-ink">{{ $item->name }}</span>
                                     <span class="block font-mono text-xs text-muted">{{ $item->asset_tag }}</span>
+                                    <span x-show="isTaken('equipment', {{ $item->id }})" x-text="taken.equipment[{{ $item->id }}]"
+                                          class="block text-xs font-medium text-red-600" style="display: none;"></span>
                                 </span>
                             </label>
                         @endforeach
@@ -104,12 +120,17 @@
             <x-select id="room_id" name="room_id" class="block w-full">
                 <option value="">No room, equipment only</option>
                 @foreach ($rooms as $room)
-                    <option value="{{ $room->id }}" @selected((int) old('room_id', $reservation->room_id) === $room->id)>
-                        {{ $room->name }} ({{ $room->code }}){{ $room->capacity ? ' · ' . $room->capacity . ' seats' : '' }}
+                    @php($roomLabel = $room->name . ' (' . $room->code . ')' . ($room->capacity ? ' · ' . $room->capacity . ' seats' : ''))
+                    <option value="{{ $room->id }}" @selected((int) old('room_id', $reservation->room_id) === $room->id)
+                            :disabled="isTaken('rooms', {{ $room->id }}) && ! $el.selected"
+                            x-text="@js($roomLabel) + (isTaken('rooms', {{ $room->id }}) ? ' — already reserved' : '')">
+                        {{ $roomLabel }}
                     </option>
                 @endforeach
             </x-select>
             <x-input-error :messages="$errors->get('room_id')" class="mt-2" />
+            <p x-show="isTaken('rooms', $root.querySelector('[name=room_id]').value)" style="display: none;"
+               class="mt-2 text-xs font-medium text-red-600">This room is already reserved at the chosen time.</p>
         </div>
         <p class="mt-3 text-xs text-muted">Pick at least one item or a room.</p>
     </section>
